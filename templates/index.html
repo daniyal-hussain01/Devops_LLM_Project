@@ -117,9 +117,17 @@
         {% endfor %}
     </select>
 
-    <button onclick="generate()">Generate</button>
-    <button class="toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
-    <button class="toggle-btn" onclick="clearChat()">Clear</button>
+    <!-- Top row buttons -->
+    <div>
+        <button onclick="generate()">Generate</button>
+        <button class="toggle-btn" onclick="stopGenerate()">Stop</button>
+        <button class="toggle-btn" onclick="clearChat()">Clear</button>
+    </div>
+
+    <!-- Toggle theme button below -->
+    <div style="margin-top: 10px;">
+        <button class="toggle-btn" onclick="toggleTheme()">Toggle Theme</button>
+    </div>
 
     <div class="spinner" id="spinner"></div>
 
@@ -127,6 +135,9 @@
 </div>
 
 <script>
+    let controller = null;       // For aborting fetch
+    let typingInterval = null;   // For stopping typewriter
+
     function toggleTheme() {
         document.body.classList.toggle("light");
     }
@@ -137,21 +148,30 @@
 
         output.innerHTML = "";
         spinner.style.display = "none";
+        if (controller) {
+            controller.abort();
+            controller = null;
+        }
+        if (typingInterval) {
+            clearInterval(typingInterval);
+            typingInterval = null;
+        }
     }
 
     function typeWriter(text, element, speed = 20) {
         element.innerHTML = "";
         let i = 0;
 
-        function typing() {
+        if (typingInterval) clearInterval(typingInterval);
+        typingInterval = setInterval(() => {
             if (i < text.length) {
                 element.innerHTML += text.charAt(i);
                 i++;
-                setTimeout(typing, speed);
+            } else {
+                clearInterval(typingInterval);
+                typingInterval = null;
             }
-        }
-
-        typing();
+        }, speed);
     }
 
     async function generate() {
@@ -164,25 +184,49 @@
         output.innerHTML = "";
         spinner.style.display = "block";
 
+        // AbortController to stop fetch
+        controller = new AbortController();
+        const signal = controller.signal;
+
         try {
             const response = await fetch("/generate", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ id: id })
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ id: id }),
+                signal: signal
             });
 
             const data = await response.json();
             spinner.style.display = "none";
+            controller = null;
 
             const result = data.result || data.error || "No response received.";
             typeWriter(result, output);
 
         } catch (error) {
             spinner.style.display = "none";
-            output.innerHTML = "Error connecting to server.";
+            controller = null;
+            if (error.name === "AbortError") {
+                output.innerHTML = "Generation stopped by user.";
+            } else {
+                output.innerHTML = "Error connecting to server.";
+            }
         }
+    }
+
+    function stopGenerate() {
+        if (controller) {
+            controller.abort();
+            controller = null;
+        }
+        if (typingInterval) {
+            clearInterval(typingInterval);
+            typingInterval = null;
+            const output = document.getElementById("output");
+            output.innerHTML += "\n[Typing stopped]";
+        }
+        const spinner = document.getElementById("spinner");
+        spinner.style.display = "none";
     }
 </script>
 
