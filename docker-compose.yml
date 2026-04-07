@@ -1,0 +1,48 @@
+services:
+  # ─── Application ────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: devops-llm-app
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+      - LOG_LEVEL=INFO
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - app-data:/app/data
+    networks:
+      - llm-network
+
+  # ─── Nginx Reverse Proxy ────────────────────────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: devops-llm-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - llm-network
+
+volumes:
+  app-data:
+
+networks:
+  llm-network:
+    driver: bridge

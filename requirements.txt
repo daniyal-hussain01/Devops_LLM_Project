@@ -1,0 +1,12 @@
+# Core
+flask==3.1.0
+openai==1.61.0
+python-dotenv==1.0.1
+gunicorn==23.0.0
+
+# Development & Testing
+pytest==8.3.4
+pytest-cov==6.0.0
+flake8==7.1.1
+black==24.10.0
+isort==5.13.2
