@@ -71,16 +71,18 @@ def generate():
             system_prompt="You are a knowledgeable assistant. Provide clear, well-structured, and insightful responses.",
         )
 
-        return jsonify({
-            "status": "success",
-            "data": {
-                "prompt_id": prompt_id,
-                "response": result["content"],
-                "model": result["model"],
-                "usage": result["usage"],
-                "latency_seconds": result["latency_seconds"],
-            },
-        })
+        return jsonify(
+            {
+                "status": "success",
+                "data": {
+                    "prompt_id": prompt_id,
+                    "response": result["content"],
+                    "model": result["model"],
+                    "usage": result["usage"],
+                    "latency_seconds": result["latency_seconds"],
+                },
+            }
+        )
 
     except Exception as e:
         logger.error(f"LLM generation failed for prompt_id={prompt_id}: {e}")
@@ -93,11 +95,7 @@ def health_check():
     from flask import current_app
     from app.database import get_db_connection
 
-    health = {
-        "status": "healthy",
-        "version": "1.0.0",
-        "checks": {}
-    }
+    health = {"status": "healthy", "version": "1.0.0", "checks": {}}
 
     # Database check
     try:
@@ -121,3 +119,48 @@ def list_categories():
     """GET /api/categories - List all prompt categories."""
     categories = get_categories()
     return jsonify({"status": "success", "data": categories})
+
+
+@main_bp.route("/generate-from-text", methods=["POST"])
+def generate_from_text():
+    """POST /generate-from-text - Generate LLM response from raw prompt text.
+    Used by AWS Lambda for the S3-triggered event-driven pipeline.
+    """
+    from flask import current_app
+
+    if not request.is_json:
+        return jsonify({"error": "Content-Type must be application/json"}), 400
+
+    data = request.get_json(silent=True) or {}
+    prompt_text = (data.get("prompt") or "").strip()
+
+    if not prompt_text:
+        return jsonify({"error": "Missing required field: 'prompt'"}), 400
+
+    try:
+        llm_service = current_app.config.get("LLM_SERVICE")
+        if not llm_service:
+            return jsonify({"error": "LLM service not configured"}), 503
+
+        result = llm_service.generate_response(
+            prompt=prompt_text,
+            system_prompt="You are a knowledgeable assistant. Provide clear, well-structured, and insightful responses.",
+        )
+
+        # Return both 'result' (for Lambda compatibility) and 'data' (full info)
+        return jsonify(
+            {
+                "status": "success",
+                "result": result["content"],
+                "data": {
+                    "response": result["content"],
+                    "model": result["model"],
+                    "usage": result["usage"],
+                    "latency_seconds": result["latency_seconds"],
+                },
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"LLM generation from text failed: {e}")
+        return jsonify({"error": "Failed to generate response", "message": str(e)}), 502

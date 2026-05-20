@@ -8,6 +8,7 @@ load_dotenv()
 
 class Config:
     """Base configuration."""
+
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///prompts.db")
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -21,18 +22,21 @@ class Config:
 
 class DevelopmentConfig(Config):
     """Development configuration."""
+
     DEBUG = True
     LOG_LEVEL = "DEBUG"
 
 
 class ProductionConfig(Config):
     """Production configuration."""
+
     DEBUG = False
     LOG_LEVEL = "WARNING"
 
 
 class TestingConfig(Config):
     """Testing configuration."""
+
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///test_prompts.db"
     GROQ_API_KEY = "test-api-key"

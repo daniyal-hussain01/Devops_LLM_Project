@@ -23,9 +23,7 @@ class RateLimiter:
         window_start = now - self.window_seconds
 
         # Clean old entries
-        self.requests[client_ip] = [
-            ts for ts in self.requests[client_ip] if ts > window_start
-        ]
+        self.requests[client_ip] = [ts for ts in self.requests[client_ip] if ts > window_start]
 
         if len(self.requests[client_ip]) >= self.max_requests:
             return False
@@ -46,17 +44,24 @@ rate_limiter = RateLimiter()
 
 def rate_limit(f):
     """Decorator to enforce rate limiting on endpoints."""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         client_ip = request.remote_addr
         if not rate_limiter.is_allowed(client_ip):
             logger.warning(f"Rate limit exceeded for {client_ip}")
-            return jsonify({
-                "error": "Rate limit exceeded",
-                "message": "Too many requests. Please try again later.",
-                "retry_after_seconds": 60,
-            }), 429
+            return (
+                jsonify(
+                    {
+                        "error": "Rate limit exceeded",
+                        "message": "Too many requests. Please try again later.",
+                        "retry_after_seconds": 60,
+                    }
+                ),
+                429,
+            )
         return f(*args, **kwargs)
+
     return decorated_function
 
 

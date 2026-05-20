@@ -10,7 +10,14 @@ logger = logging.getLogger(__name__)
 class LLMService:
     """Service class for LLM API interactions with built-in resilience."""
 
-    def __init__(self, api_key: str, base_url: str, model: str, max_tokens: int = 1024, temperature: float = 0.7):
+    def __init__(
+        self,
+        api_key: str,
+        base_url: str,
+        model: str,
+        max_tokens: int = 1024,
+        temperature: float = 0.7,
+    ):
         if not api_key:
             raise ValueError("GROQ_API_KEY is required. Set it in .env file.")
 

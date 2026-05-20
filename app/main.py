@@ -36,7 +36,9 @@ def create_app(config=None):
     _configure_logging(app.config.get("LOG_LEVEL", "INFO"))
 
     logger = logging.getLogger(__name__)
-    logger.info(f"Starting DevOps LLM App v1.0.0 | env={app.config.get('FLASK_ENV', 'development')}")
+    logger.info(
+        f"Starting DevOps LLM App v1.0.0 | env={app.config.get('FLASK_ENV', 'development')}"
+    )
 
     # Initialize database
     init_db()
