@@ -70,7 +70,10 @@ def generate():
 
         result = llm_service.generate_response(
             prompt=prompt_text,
-            system_prompt="You are a knowledgeable assistant. Provide clear, well-structured, and insightful responses.",
+            system_prompt=(
+                "You are a knowledgeable assistant. "
+                "Provide clear, well-structured, and insightful responses."
+            ),
         )
 
         return jsonify(
@@ -147,7 +150,10 @@ def generate_from_text():
 
         result = llm_service.generate_response(
             prompt=prompt_text,
-            system_prompt="You are a knowledgeable assistant. Provide clear, well-structured, and insightful responses.",
+            system_prompt=(
+                "You are a knowledgeable assistant. "
+                "Provide clear, well-structured, and insightful responses."
+            ),
         )
 
         # Return both 'result' (for Lambda compatibility) and 'data' (full info)
