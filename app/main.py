@@ -2,12 +2,14 @@
 
 import logging
 import sys
+
 from flask import Flask
+
 from app.config import get_config
 from app.database import init_db
-from app.routes import main_bp
-from app.middleware import setup_request_logging, setup_error_handlers
 from app.llm_service import LLMService
+from app.middleware import setup_error_handlers, setup_request_logging
+from app.routes import main_bp
 
 
 def create_app(config=None):

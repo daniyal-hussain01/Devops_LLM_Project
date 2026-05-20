@@ -1,8 +1,8 @@
 """Database module with connection management and CRUD operations."""
 
+import logging
 import os
 import sqlite3
-import logging
 from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)

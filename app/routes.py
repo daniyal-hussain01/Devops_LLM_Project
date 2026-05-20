@@ -1,8 +1,10 @@
 """API routes for the DevOps LLM application."""
 
 import logging
-from flask import Blueprint, render_template, request, jsonify
-from app.database import get_all_prompts, get_prompt_by_id, get_categories
+
+from flask import Blueprint, jsonify, render_template, request
+
+from app.database import get_all_prompts, get_categories, get_prompt_by_id
 from app.middleware import rate_limit
 
 logger = logging.getLogger(__name__)
@@ -93,6 +95,7 @@ def generate():
 def health_check():
     """GET /health - Application health check endpoint."""
     from flask import current_app
+
     from app.database import get_db_connection
 
     health = {"status": "healthy", "version": "1.0.0", "checks": {}}

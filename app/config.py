@@ -1,6 +1,7 @@
 """Application configuration with environment-based settings."""
 
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()

@@ -1,10 +1,11 @@
 """Middleware for request logging, rate limiting, and error handling."""
 
-import time
 import logging
-from functools import wraps
+import time
 from collections import defaultdict
-from flask import request, jsonify
+from functools import wraps
+
+from flask import jsonify, request
 
 logger = logging.getLogger(__name__)
 

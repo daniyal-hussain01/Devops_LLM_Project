@@ -2,7 +2,8 @@
 
 import logging
 import time
-from openai import OpenAI, APIError, RateLimitError, APIConnectionError
+
+from openai import APIConnectionError, APIError, OpenAI, RateLimitError
 
 logger = logging.getLogger(__name__)
 
