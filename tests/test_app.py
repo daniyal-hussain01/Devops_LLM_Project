@@ -1,3 +1,4 @@
+# isort: skip_file
 """Unit tests for the DevOps LLM application."""
 
 import json
